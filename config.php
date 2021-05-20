@@ -1,7 +1,5 @@
 <?php
 
-require __DIR__ . '/vendor/Autoload.php';
-
 const LISTEN_PORT = 10005;
 const CLIENT_PASSWORD = 'password';
 

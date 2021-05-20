@@ -8,10 +8,6 @@ use Swoole\Http\Request;
 use Swoole\Http\Response;
 use Swoole\Database\RedisConfig;
 use Swoole\Database\RedisPool;
-use SourcePot\EventSystem\QueueInserter;
-
-// configure Queue details
-QueueInserter::$queuePrefix = REDIS_QUEUE_PREFIX;
 
 // configure Redis Pool
 $redisPool = new RedisPool(

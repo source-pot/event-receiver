@@ -2,8 +2,6 @@
 
 use Swoole\Http\Request;
 use Swoole\Http\Response;
-use SourcePot\EventSystem\QueueInserter;
-use SourcePot\EventSystem\Event;
 
 // convenience functions to handle requests
 
@@ -24,6 +22,8 @@ function handleIncomingRequest(\Redis $redis, Request $request, Response $respon
      * 403 if the auth token is valid but the token is not permitted to raise the event it's trying to
      * 404 if we decide to validate event names in the future
      * 405 if the request is not a POST
+     * 
+     * 500 if we couldn't add the event to the queue
      */
 
     // only allow post requests
@@ -86,16 +86,17 @@ function handleIncomingRequest(\Redis $redis, Request $request, Response $respon
         return true;
     }
 
-    $event = new Event($eventName, $eventPayload);
+    // we store the event name in the event data so we don't need to worry about finding the name of the queue we fetch it from later
+    $event = [
+        'name' => $eventName,
+        'payload' => $eventPayload
+    ];
 
-    try {
-        // TODO check over exceptions thrown by redis if it fails to connect, it might just fail silently
-        QueueInserter::insert($redis, $eventName, $event);
-
-    } catch(\Exception $e) {
-
-        echo date('Y-m-d H:i:s', time()) . ' :: Error adding event to queue: ' . $e->getMessage() . "\n";
-
+    if(!$redis->lpush(REDIS_QUEUE_PREFIX . $eventName, json_encode($event)))
+    {
+        echo date('Y-m-d H:i:s', time()) . " :: Error adding event to queue\n";
+        sendUnableToAddEventToQueueResponse($request,$response);
+        return true;
     }
 
     // on success, send a 202 response with text/plain body with confirmation message
@@ -141,7 +142,6 @@ function sendInvalidPasswordResponse(Request $request, Response $response)
    $response->end('Not authorised (invalid password)');
 }
 
-
 function sendInvalidJSONResponse(Request $request, Response $response)
 {
    $response->status(400);
@@ -149,9 +149,9 @@ function sendInvalidJSONResponse(Request $request, Response $response)
    $response->end('Invalid JSON payload');
 }
 
-function sendInvalidSerialisedRepsonse(Request $request, Response $response)
+function sendUnableToAddEventToQueueResponse(Request $request, Response $response)
 {
-   $response->status(400);
+   $response->status(500);
    $response->header('content-type', 'text/plain');
-   $response->end('Invalid Serialised object payload');
+   $response->end('Unable to add event data to queue');
 }
