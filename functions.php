@@ -100,7 +100,7 @@ function handleIncomingRequest(\Redis $redis, Request $request, Response $respon
         'payload' => $eventPayload
     ];
 
-    if(!$redis->rpush(REDIS_QUEUE_PREFIX . $eventName, json_encode($event)))
+    if(!$queueLength = $redis->rpush(REDIS_QUEUE_PREFIX . $eventName, json_encode($event)))
     {
         echo date('Y-m-d H:i:s', time()) . " :: Error adding event to queue\n";
         sendUnableToAddEventToQueueResponse($request,$response);
@@ -108,7 +108,7 @@ function handleIncomingRequest(\Redis $redis, Request $request, Response $respon
     }
 
     // on success, send a 202 response with text/plain body with confirmation message
-    echo date('Y-m-d H:i:s', time()) . ' :: ' . $eventName . ' event received' . "\n";
+    echo date('Y-m-d H:i:s', time()) . " :: $eventName event received, $queueLength items in event queue\n";
     $response->status(202);
     $response->header('content-type', 'text/plain');
     $response->end('Request received');
