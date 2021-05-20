@@ -39,7 +39,7 @@ $server->on('request', function(Request $request, Response $response) use ($redi
     $redisPool->put($redis);
 
     $time = (microtime(true) - $start) * 1000;
-    echo date('Y-m-d H:i:s', time()) . ' :: Request processed in ' . number_format($time,4) . " ms\n";
+    echo date('Y-m-d H:i:s', time()) . ' :: Request processed in ' . number_format($time,4) . "s, memory usage " . number_format(memory_get_usage(true)/1024/2014, 4) . "mb\n";
 });
 
 $server->start();
