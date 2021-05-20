@@ -92,7 +92,7 @@ function handleIncomingRequest(\Redis $redis, Request $request, Response $respon
         'payload' => $eventPayload
     ];
 
-    if(!$redis->lpush(REDIS_QUEUE_PREFIX . $eventName, json_encode($event)))
+    if(!$redis->rpush(REDIS_QUEUE_PREFIX . $eventName, json_encode($event)))
     {
         echo date('Y-m-d H:i:s', time()) . " :: Error adding event to queue\n";
         sendUnableToAddEventToQueueResponse($request,$response);
