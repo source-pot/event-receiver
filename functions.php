@@ -12,7 +12,7 @@ function handleIncomingRequest(\Redis $redis, Request $request, Response $respon
    /**
      * Spec:
      * requests must be POST requests
-     * URI iwll be treated as the event name (e.g. onusercreate) case insensitive
+     * URI will be treated as the event name (e.g. onusercreate) case insensitive
      * requests may have a trailling forward slash
      * must have authentication token 'auth' in request header
      * 
