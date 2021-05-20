@@ -73,6 +73,14 @@ function handleIncomingRequest(\Redis $redis, Request $request, Response $respon
     // now we need to know the requested uri
     $eventName = trim($request->server['request_uri'], '/' );
 
+    // TODO change this to validate the event name
+    if(!$eventName)
+    {
+        echo date('Y-m-d H:i:s', time()) . " :: invalid event name received: \n";
+        sendInvalidEventNameResponse($request,$response);
+        return true;
+    }
+
     // TODO add event name with expiration date to set of recently used events
 
     try {
@@ -140,6 +148,13 @@ function sendInvalidPasswordResponse(Request $request, Response $response)
    $response->status(403);
    $response->header('content-type', 'text/plain');
    $response->end('Not authorised (invalid password)');
+}
+
+function sendInvalidEventNameResponse(Request $request, Response $response)
+{
+   $response->status(404);
+   $response->header('content-type', 'text/plain');
+   $response->end('Invalid event name received');
 }
 
 function sendInvalidJSONResponse(Request $request, Response $response)
